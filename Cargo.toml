@@ -30,8 +30,8 @@ cranelift = ["wasmer/cranelift"]
 
 [dependencies]
 wasmer = { version = "=2.2.1", default-features = false, features = ["cranelift", "universal", "singlepass"] }
-cosmwasm-vm = { path = "../cosmwasm/packages/vm", features = ["staking", "stargate"] }
-cosmwasm-std = { path = "../cosmwasm/packages/std", features = ["staking", "stargate"] }
+cosmwasm-vm = { version = "=0.16.6", features = ["staking", "stargate"] }
+cosmwasm-std = { version = "=0.16.6", features = ["staking", "stargate"] }
 
 [profile.release]
 opt-level = 3
