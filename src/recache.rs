@@ -19,7 +19,7 @@ pub unsafe fn do_recache(
         refresh_thread_num: 16,
     };
 
-    let cache: Cache<MockApi, stub::Storage, stub::Querier> =  cosmwasm_vm::Cache::new(options).unwrap();
+    let cache: Cache<MockApi, stub::Storage, stub::Querier> = cosmwasm_vm::Cache::new(options).unwrap();
 
     let mut state_dir = PathBuf::new();
     state_dir.push(base_dir);
