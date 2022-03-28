@@ -1,6 +1,8 @@
 use std::{env, path::PathBuf};
 
 mod rebuild;
+mod recache;
+mod stub;
 
 fn main() {
     let paths: Vec<PathBuf> = env::args()
@@ -8,8 +10,12 @@ fn main() {
         .map(|arg| PathBuf::from(arg))
         .collect();
 
-    let src = paths.get(0).unwrap();
-    let dest = paths.get(1).unwrap();
+    let base_dir = paths.get(0).unwrap();
 
-    rebuild::do_rebuild(src, dest);
+    unsafe { recache::do_recache(
+        base_dir,
+        "stargate,staking,terra",
+        6000,
+        6000,
+    ) }
 }

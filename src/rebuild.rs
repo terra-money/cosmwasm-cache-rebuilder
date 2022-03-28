@@ -38,7 +38,6 @@ pub fn do_rebuild<'a>(src: &PathBuf, dest: &PathBuf) {
             Module::new(&store, code)
                 .map(|module| module.serialize_to_file(cached_file))
                 .map_err(|e| panic!("{}", e));
-            
             ()
         })
         .collect()
