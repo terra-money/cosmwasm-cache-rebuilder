@@ -1,0 +1,45 @@
+[package]
+name = "cosmwasm-cache-rebuilder"
+version = "0.1.0"
+edition = "2021"
+publish = false
+authors = ["Jesse Chung <jesse@terra.money>"]
+description = "Simple binary dedicated for rebuilding cosmwasm cache. Internal use only!"
+license = "Apache-2.0"
+exclude = [".gitignore"]
+
+[features]
+default = ["staking", "iterator"]
+# backtraces provides much better context at runtime errors (in non-wasm code)
+# at the cost of a bit of code size and performance.
+# This feature requires Rust nightly because it depends on the unstable backtrace feature.
+backtraces = []
+# iterator allows us to iterate over all DB items in a given range
+# this must be enabled to support cosmwasm contracts compiled with the 'iterator' feature
+# optional as some merkle stores (like tries) don't support this
+# given Ethereum 1.0, 2.0, Substrate, and other major projects use Tries
+# we keep this optional, to allow possible future integration (or different Cosmos Backends)
+iterator = ["cosmwasm-std/iterator"]
+staking = ["cosmwasm-std/staking"]
+# this enables all stargate-related functionality, including the ibc entry points
+stargate = ["cosmwasm-std/stargate"]
+# Use cranelift backend instead of singlepass. This is required for development on Windows.
+cranelift = ["wasmer/cranelift"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+wasmer = { version = "=2.2.1", default-features = false, features = ["cranelift", "universal", "singlepass"] }
+cosmwasm-vm = { path = "../cosmwasm/packages/vm", features = ["staking", "stargate"] }
+cosmwasm-std = { path = "../cosmwasm/packages/std", features = ["staking", "stargate"] }
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = true
+lto = false
+debug-assertions = false
+codegen-units = 16
+panic = 'unwind'
+incremental = true
+overflow-checks = true
