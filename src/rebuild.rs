@@ -31,11 +31,11 @@ pub fn do_rebuild<'a>(src: &PathBuf, dest: &PathBuf) {
 
             println!("compiling {:?} into {:?}...", filename, cached_file);
 
-            _ = File::open(p.as_path())
+            File::open(p.as_path())
                 .map(|mut blob| blob.read_to_end(&mut code))
                 .map_err(|e| panic!("{}", e));
 
-            _ = Module::new(&store, code)
+            Module::new(&store, code)
                 .map(|module| module.serialize_to_file(cached_file))
                 .map_err(|e| panic!("{}", e));
             
