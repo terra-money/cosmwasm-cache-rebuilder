@@ -16,6 +16,7 @@ pub unsafe fn do_recache(
         supported_features: features_from_csv(supported_features),
         memory_cache_size: Size::mebi(memory_cache_size),
         instance_memory_limit: Size::mebi(instance_memory_limit),
+        refresh_thread_num: 16,
     };
 
     let cache: Cache<MockApi, stub::Storage, stub::Querier> =  cosmwasm_vm::Cache::new(options).unwrap();
