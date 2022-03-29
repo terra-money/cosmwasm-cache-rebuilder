@@ -30,10 +30,10 @@ singlepass = ["wasmer/singlepass"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wasmer = { git = "https://github.com/terra-money/wasmer", rev = "v2.0.1", default-features = false, features = ["cranelift", "universal", "singlepass"] }
-wasmer-middlewares = { git = "https://github.com/terra-money/wasmer", rev = "v2.0.1" }
-cosmwasm-vm = { git = "https://github.com/terra-money/cosmwasm.git", rev = "v0.16.4", features = ["staking", "stargate"] }
-cosmwasm-std = { git = "https://github.com/terra-money/cosmwasm.git", rev = "v0.16.4", features = ["staking", "stargate"] }
+wasmer = { version = "=2.2.1", default-features = false, features = ["cranelift", "universal", "singlepass"] }
+wasmer-middlewares = "=2.2.1"
+cosmwasm-std = { git = "https://github.com/CosmWasm/cosmwasm", rev = "v0.16.6", features = ["staking", "stargate"] }
+cosmwasm-vm = { git = "https://github.com/CosmWasm/cosmwasm", rev = "v0.16.6", features = ["staking", "stargate"] }
 serde_json = "1.0"
 hex = "0.4"
 
