@@ -1,6 +1,5 @@
 use std::{env, path::PathBuf};
 
-mod rebuild;
 mod recache;
 mod stub;
 
