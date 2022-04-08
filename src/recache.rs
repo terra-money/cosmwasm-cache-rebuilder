@@ -1,9 +1,12 @@
-use std::{path::PathBuf, fs, os::unix::prelude::OsStrExt};
-use cosmwasm_vm::{testing::{MockApi}, InstanceOptions};
-use cosmwasm_vm::{Cache, CacheOptions, features_from_csv, Size, Checksum};
+use cosmwasm_vm::{features_from_csv, Cache, CacheOptions, Checksum, Size};
+use cosmwasm_vm::{testing::MockApi, InstanceOptions};
 use hex;
+use std::{fs, os::unix::prelude::OsStrExt, path::PathBuf};
 
 use crate::stub;
+
+use std::thread;
+use std::time::Duration;
 
 pub unsafe fn do_recache(
     base_dir: &PathBuf,
@@ -11,73 +14,69 @@ pub unsafe fn do_recache(
     memory_cache_size: usize,
     instance_memory_limit: usize,
 ) {
-    let options = CacheOptions{
+    let options = CacheOptions {
         base_dir: base_dir.into(),
         supported_features: features_from_csv(supported_features),
         memory_cache_size: Size::mebi(memory_cache_size),
         instance_memory_limit: Size::mebi(instance_memory_limit),
     };
 
-    let cache: Cache<MockApi, stub::Storage, stub::Querier> = cosmwasm_vm::Cache::new(options).unwrap();
+    // let cache: Cache<MockApi, stub::Storage, stub::Querier> = cosmwasm_vm::Cache::new(options).unwrap();
 
     let mut state_dir = PathBuf::new();
     state_dir.push(base_dir);
     state_dir.push("state");
     state_dir.push("wasm");
     let files = get_files(&state_dir);
-    let instance_options = InstanceOptions{
+    let instance_options = InstanceOptions {
         gas_limit: 3000000,
         print_debug: true,
     };
 
     println!("compiling {} target files", files.len());
 
-    files
-        .iter()
-        .filter(|p| p.as_path().is_file())
-        .map(move |p| {
-            let filename = p.file_name().unwrap();
+    let mut handles = vec![];
+    let files: Vec<PathBuf> = files.into_iter().filter(|f| f.as_path().is_file()).collect::<Vec<PathBuf>>();
+    for f in files {
+        let options = options.clone();
+        let filename = f.file_name().unwrap();
+        let handle = thread::spawn(move || {
             let mut checksum: [u8; 32] = [0; 32];
-            hex::decode_to_slice(filename.as_bytes(), &mut checksum)
-                .map_err(|e| panic!("{}", e));
-            println!("compilng {:?}", filename);
+            hex::decode_to_slice(filename.as_bytes(), &mut checksum).map_err(|e| panic!("{}", e));
+            println!("compiling {:?}", filename);
 
-            Checksum::from(checksum)
-        })
-        .map(|checksum| {
-            // todo: fix me
+            let checksum = Checksum::from(checksum);
+
             let backend = cosmwasm_vm::Backend {
                 api: cosmwasm_vm::testing::MockApi::default(),
                 storage: stub::Storage {},
-                querier: stub::Querier {}
+                querier: stub::Querier {},
             };
 
+            let cache: Cache<MockApi, stub::Storage, stub::Querier> =
+                cosmwasm_vm::Cache::new(options).unwrap();
             cache
                 .get_instance(&checksum, backend, instance_options)
                 .map_err(|e| panic!("{}", e))
                 .map(|instance| instance)
                 .unwrap();
-
             ()
-        })
-        .collect::<Vec<()>>();
+        });
 
+        handle.join().unwrap();
+    }
 }
 
-fn get_files(
-    base_dir: &PathBuf
-) -> Vec<PathBuf> {
+fn get_files(base_dir: &PathBuf) -> Vec<PathBuf> {
     fs::read_dir(base_dir)
         .map_err(|e| panic!("{}", e))
         .map(|res| {
-            res
-                .filter_map(|el| el.ok())
+            res.filter_map(|el| el.ok())
                 .map(|el| el.path())
                 .collect::<Vec<PathBuf>>()
         })
         .unwrap()
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -90,12 +89,6 @@ mod tests {
         let mut base_dir = PathBuf::new();
         base_dir.push("./test");
 
-        unsafe { do_recache(
-            &base_dir,
-            "stargate,staking,terra",
-            6000,
-            6000,
-        ) }
+        unsafe { do_recache(&base_dir, "stargate,staking,terra", 6000, 6000) }
     }
-
 }
