@@ -34,6 +34,7 @@ pub unsafe fn do_recache(
 
     println!("compiling {} target files", files.len());
 
+    let mut handles: Vec<thread::JoinHandle<()>> = vec![];
     let files: Vec<PathBuf> = files
         .into_iter()
         .filter(|f| f.as_path().is_file())
@@ -66,7 +67,11 @@ pub unsafe fn do_recache(
             ()
         });
 
-        handle.join().unwrap();
+        handles.push(handle);
+    }
+
+    for h in handles {
+        h.join().unwrap();
     }
 }
 
