@@ -1,12 +1,11 @@
 use cosmwasm_vm::{features_from_csv, Cache, CacheOptions, Checksum, Size};
 use cosmwasm_vm::{testing::MockApi, InstanceOptions};
 use hex;
-use std::{fs, os::unix::prelude::OsStrExt, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 use crate::stub;
 
 use std::thread;
-use std::time::Duration;
 
 pub unsafe fn do_recache(
     base_dir: &PathBuf,
@@ -35,14 +34,18 @@ pub unsafe fn do_recache(
 
     println!("compiling {} target files", files.len());
 
-    let mut handles = vec![];
-    let files: Vec<PathBuf> = files.into_iter().filter(|f| f.as_path().is_file()).collect::<Vec<PathBuf>>();
+    let files: Vec<PathBuf> = files
+        .into_iter()
+        .filter(|f| f.as_path().is_file())
+        .collect::<Vec<PathBuf>>();
     for f in files {
         let options = options.clone();
-        let filename = f.file_name().unwrap();
+        let filename = f.file_name().unwrap().to_str().unwrap().to_string();
         let handle = thread::spawn(move || {
             let mut checksum: [u8; 32] = [0; 32];
-            hex::decode_to_slice(filename.as_bytes(), &mut checksum).map_err(|e| panic!("{}", e));
+            hex::decode_to_slice(filename.as_bytes(), &mut checksum)
+                .map_err(|e| panic!("{}", e))
+                .unwrap();
             println!("compiling {:?}", filename);
 
             let checksum = Checksum::from(checksum);
