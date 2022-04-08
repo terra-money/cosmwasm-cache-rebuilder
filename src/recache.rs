@@ -5,7 +5,7 @@ use std::{fs, path::PathBuf};
 
 use crate::stub;
 
-use std::thread;
+use threadpool::ThreadPool;
 
 pub unsafe fn do_recache(
     base_dir: &PathBuf,
@@ -34,7 +34,7 @@ pub unsafe fn do_recache(
 
     println!("compiling {} target files", files.len());
 
-    let mut handles: Vec<thread::JoinHandle<()>> = vec![];
+    let pool = ThreadPool::new(128);
     let files: Vec<PathBuf> = files
         .into_iter()
         .filter(|f| f.as_path().is_file())
@@ -42,7 +42,8 @@ pub unsafe fn do_recache(
     for f in files {
         let options = options.clone();
         let filename = f.file_name().unwrap().to_str().unwrap().to_string();
-        let handle = thread::spawn(move || {
+
+        pool.execute(move || {
             let mut checksum: [u8; 32] = [0; 32];
             hex::decode_to_slice(filename.as_bytes(), &mut checksum)
                 .map_err(|e| panic!("{}", e))
@@ -66,12 +67,6 @@ pub unsafe fn do_recache(
                 .unwrap();
             ()
         });
-
-        handles.push(handle);
-    }
-
-    for h in handles {
-        h.join().unwrap();
     }
 }
 

@@ -36,6 +36,7 @@ cosmwasm-std = { git = "https://github.com/CosmWasm/cosmwasm", rev = "v0.16.6", 
 cosmwasm-vm = { git = "https://github.com/CosmWasm/cosmwasm", rev = "v0.16.6", features = ["staking", "stargate"] }
 serde_json = "1.0"
 hex = "0.4"
+threadpool = "1"
 
 [profile.release]
 opt-level = 3
