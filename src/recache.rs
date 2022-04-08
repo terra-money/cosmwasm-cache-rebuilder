@@ -34,7 +34,7 @@ pub unsafe fn do_recache(
 
     println!("compiling {} target files", files.len());
 
-    let pool = ThreadPool::new(128);
+    let pool = ThreadPool::new(8);
     let files: Vec<PathBuf> = files
         .into_iter()
         .filter(|f| f.as_path().is_file())
