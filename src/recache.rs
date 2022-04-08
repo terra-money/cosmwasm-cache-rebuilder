@@ -68,6 +68,8 @@ pub unsafe fn do_recache(
             ()
         });
     }
+
+    pool.join();
 }
 
 fn get_files(base_dir: &PathBuf) -> Vec<PathBuf> {
