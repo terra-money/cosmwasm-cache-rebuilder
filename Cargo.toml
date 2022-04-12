@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 publish = false
 authors = ["Jesse Chung <jesse@terra.money>"]
-description = "Simple binary dedicated for rebuilding cosmwasm cache. Internal use only!"
+description = "Simple runtime dedicated for rebuilding cosmwasm cache."
 license = "Apache-2.0"
 exclude = [".gitignore"]
 
